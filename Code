@@ -1,0 +1,49 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+# 1️⃣ Load CSV with correct encoding
+file_path = r"C:\Users\swathi\Downloads\archive (1)\netflix_titles.csv"
+df = pd.read_csv(file_path, encoding='latin1')
+
+# 2️⃣ Print columns
+print("Columns in dataset:", df.columns)
+
+# 3️⃣ Filter only Movies
+df = df[df['type'] == 'Movie']
+
+# 4️⃣ Convert duration to numeric
+df['duration'] = df['duration'].str.replace(' min', '', regex=False)
+df['duration'] = pd.to_numeric(df['duration'], errors='coerce')
+
+# 5️⃣ Clean data
+df_clean = df[['release_year', 'duration']].dropna()
+
+print("Number of valid rows:", len(df_clean))
+print(df_clean.head())
+
+# 6️⃣ Prepare data
+X = df_clean[['release_year']]
+y = df_clean['duration']
+
+# 7️⃣ Train model
+model = LinearRegression()
+model.fit(X, y)
+
+# 8️⃣ Predict
+future_year = [[2025]]
+predicted_duration = model.predict(future_year)
+print("Predicted movie duration for 2025:", predicted_duration[0], "minutes")
+
+# 9️⃣ Plot
+X_sorted = X.sort_values(by='release_year')
+
+plt.scatter(X, y, alpha=0.5, label='Actual Movies')
+plt.plot(X_sorted, model.predict(X_sorted), color='red', linewidth=2, label='Regression Line')
+
+plt.xlabel("Release Year")
+plt.ylabel("Movie Duration (minutes)")
+plt.title("Netflix Movie Duration vs Release Year")
+plt.legend()
+plt.grid(True)
+plt.show()
